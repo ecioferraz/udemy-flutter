@@ -1,50 +1,43 @@
 import 'package:flutter/material.dart';
 
 class TodoListPage extends StatelessWidget {
-  TodoListPage({Key? key}) : super(key: key);
-
-  // with controller
-  final TextEditingController emailController = TextEditingController();
+  const TodoListPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: emailController,
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
                   decoration: InputDecoration(
-                    labelText: 'E-mail',
+                    border: OutlineInputBorder(),
+                    labelText: 'Adicione uma tarefa',
+                    hintText: 'Ex.: Estudar Flutter',
                   ),
-                  onChanged: onChanged, // with onChanged
-                  onSubmitted: onSubmitted, // with onSubmitted
                 ),
-                ElevatedButton(
-                  onPressed: login, // with controller
-                  child: Text('Entrar'),
+              ),
+              SizedBox(
+                width: 8,
+              ),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xff00d7f3),
+                  padding: EdgeInsets.all(14.0),
                 ),
-              ],
-            )),
+                child: Icon(
+                  Icons.add,
+                  size: 30,
+                ),
+              )
+            ],
+          ),
+        ),
       ),
     );
-  }
-
-  // with controller
-  void login() {
-    String text = emailController.text;
-    print('with controller $text'); // on button click
-    emailController.clear();
-  }
-
-  void onChanged(String text) {
-    print('with onChanged $text'); // as it's typed
-  }
-
-  void onSubmitted(String text) {
-    print('with onSubmitted $text'); // only on enter
   }
 }
