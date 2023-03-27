@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:todo_list/models/todo.dart';
+import 'package:todo_list/repositories/todo_repository.dart';
 import 'package:todo_list/widgets/todo_list_item.dart';
 
 class TodoListPage extends StatefulWidget {
-  TodoListPage({Key? key}) : super(key: key);
+  const TodoListPage({Key? key}) : super(key: key);
 
   @override
   State<TodoListPage> createState() => _TodoListPageState();
@@ -11,10 +12,23 @@ class TodoListPage extends StatefulWidget {
 
 class _TodoListPageState extends State<TodoListPage> {
   final TextEditingController todoController = TextEditingController();
+  final TodoRepository todoRepository = TodoRepository();
 
   List<Todo> todos = [];
   Todo? deletedTodo;
   int? deletedTodoIndex;
+  String? errorText;
+
+  @override
+  void initState() {
+    super.initState();
+
+    todoRepository.getTodoList().then((value) {
+      setState(() {
+        todos = value;
+      });
+    });
+  }
 
   void onDelete(Todo todo) {
     deletedTodo = todo;
@@ -23,6 +37,8 @@ class _TodoListPageState extends State<TodoListPage> {
     setState(() {
       todos.remove(todo);
     });
+
+    todoRepository.saveTodoList(todos);
 
     ScaffoldMessenger.of(context).clearSnackBars();
 
@@ -33,6 +49,7 @@ class _TodoListPageState extends State<TodoListPage> {
           setState(() {
             todos.insert(deletedTodoIndex!, deletedTodo!);
           });
+          todoRepository.saveTodoList(todos);
         },
         textColor: const Color(0xff00d7f3),
       ),
@@ -49,6 +66,8 @@ class _TodoListPageState extends State<TodoListPage> {
     setState(() {
       todos.clear();
     });
+
+    todoRepository.saveTodoList(todos);
   }
 
   void confirmDeleteAll() {
@@ -98,6 +117,16 @@ class _TodoListPageState extends State<TodoListPage> {
                         controller: todoController,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
+                          errorText: errorText,
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Color(0xff00d7f3),
+                              width: 2,
+                            ),
+                          ),
+                          labelStyle: TextStyle(
+                            color: Color(0xff00d7f3),
+                          ),
                           labelText: 'Adicione uma tarefa',
                           hintText: 'Ex.: Estudar Flutter',
                         ),
@@ -106,15 +135,25 @@ class _TodoListPageState extends State<TodoListPage> {
                     SizedBox(width: 8),
                     ElevatedButton(
                       onPressed: () {
-                        String text = todoController.text;
                         setState(() {
+                          String task = todoController.text;
+
+                          if (task.isEmpty) {
+                            setState(() {
+                              errorText = 'A tarefa não pode estar vazia!';
+                            });
+                            return;
+                          }
+
                           Todo newTodo = Todo(
                             dateTime: DateTime.now(),
-                            task: text,
+                            task: task,
                           );
                           todos.add(newTodo);
+                          errorText = null;
                         });
                         todoController.clear();
+                        todoRepository.saveTodoList(todos);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xff00d7f3),
